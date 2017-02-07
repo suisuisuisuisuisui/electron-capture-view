@@ -1,0 +1,13 @@
+{
+  "name": "electron-capture-view",
+  "version": "0.0.1",
+  "description": "electron capture view",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "electron src/app"
+  },
+  "author": "yasui_takanori",
+  "license": "MIT",
+  "dependencies": {
+  }
+}
