@@ -2,7 +2,14 @@
 
 const electron = require('electron');
 const ipcRenderer = electron.ipcRenderer;
-const remote = electron.remote;
+const remote = electron.remote
+
+function _save(path){
+    var a = document.createElement('a');
+    a.href = url;
+    a.setAttribute('download', path);
+    a.dispatchEvent(new CustomEvent('click'));
+}
 
 exports.setUp = function() {
     const winId = remote.getCurrentWindow().id;

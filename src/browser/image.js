@@ -10,7 +10,16 @@ const electron = require('electron');
 const ipcMain = electron.ipcMain;
 const nativeImage = electron.nativeImage;
 const BrowserWindow = electron.BrowserWindow;
+const globalShortcut = electron.globalShortcut;
+const dialog = electron.dialog;
 
+const cache = require('../cache');
+
+const SAVE_SHORTCUT_KEY = 'Command+S';
+
+/**
+ * キャプチャ処理
+ */
 exports.capture = function() {
     const path = `/tmp/${Date.now()}.png`;
     _capture(path).on('captured', (exists) => {
@@ -23,6 +32,32 @@ exports.capture = function() {
         console.error(err);
     });
 };
+
+/**
+ * アクティブなキャプチャの保存
+ * @return {[type]} [description]
+ */
+exports.save = function() {
+    const window = BrowserWindow.getFocusedWindow();
+    if (!window) {
+        return;
+    }
+
+    const path = cache.get(window);
+    if (!path) {
+        return;
+    }
+
+    dialog.showSaveDialog(window, {defaultPath: `~/Desktop/${path.slice(path.lastIndexOf('/') + 1)}`}, (filename) => {
+        if (!filename) {
+            return;
+        }
+
+        const rs = fs.createReadStream(path);
+        const ws = fs.createWriteStream(filename);
+        rs.pipe(ws);
+    });
+}
 
 /**
  * Macキャプチャーコマンド(screencapture)の実行
@@ -103,12 +138,27 @@ function _openWindow(path) {
     win.on('closed', () => {
         fs.unlink(path);
         win.destroy();
+        globalShortcut.unregister(SAVE_SHORTCUT_KEY);
         win = null;
+    });
+
+    win.on('blur', () => {
+        globalShortcut.unregister(SAVE_SHORTCUT_KEY);
+    });
+
+    win.on('focus', () => {
+        if (globalShortcut.isRegistered(SAVE_SHORTCUT_KEY)) {
+            return;
+        }
+
+        globalShortcut.register(SAVE_SHORTCUT_KEY, exports.save);
     });
 
     win.loadURL(`file://${__dirname}/../image.html`);
     win.setAlwaysOnTop(true);
     win.show();
+
+    cache.set(win, path);
 
     _registIpc(win.id, path, ppi);
 }
