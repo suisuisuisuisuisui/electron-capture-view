@@ -11,6 +11,9 @@ function _save(path){
     a.dispatchEvent(new CustomEvent('click'));
 }
 
+let width = 0;
+let height = 0;
+
 exports.setUp = function() {
     const winId = remote.getCurrentWindow().id;
 
@@ -25,8 +28,8 @@ exports.setUp = function() {
 
         img.onload = function() {
             // mac retinaでキャプチャした画像のサイズが２倍になってる(＞x＜)
-            const width = ppi === 144 ? img.width / 2 : img.width;
-            const height = ppi === 144 ? img.height / 2 : img.height;
+            width = ppi === 144 ? img.width / 2 : img.width;
+            height = ppi === 144 ? img.height / 2 : img.height;
 
             window.resizeTo(width, height);
             canvas.width = width;
@@ -39,4 +42,19 @@ exports.setUp = function() {
     });
 
     ipcRenderer.send(`request-image-path:${winId}`, winId);
+
+    document.getElementById('elem_canvas').addEventListener('dblclick', () => {
+        const win = remote.getCurrentWindow();
+        const size = win.getSize();
+        const coordinate = electron.screen.getCursorScreenPoint();
+        win.hide();
+        if (size[0] === width && size[1] === height) {
+            win.setSize(60, 60);
+            win.setPosition(coordinate.x - 30, coordinate.y - 30);
+        } else {
+            win.setSize(width, height);
+            win.setPosition(coordinate.x - Math.floor(width / 2), coordinate.y - Math.floor(height / 2));
+        }
+        win.show();
+    });
 };

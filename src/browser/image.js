@@ -131,6 +131,7 @@ function _openWindow(path) {
         'always-on-top': true,
         'skip-taskbar': true,
         resizable: false,
+        fullscreenable: false,
         x: coordinate.x - (ppi === 144 ? imageSize.width / 2 : imageSize.width),
         y: coordinate.y - (ppi === 144 ? imageSize.height / 2 : imageSize.height),
     });
