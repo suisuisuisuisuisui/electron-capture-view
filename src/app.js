@@ -16,7 +16,7 @@ const image = require('./browser/image');
 const iconPath = path.join(__dirname, '/icon.png');
 
 let appIcon = null;
-
+// test
 app.on('ready', () => {
     let win = new BrowserWindow({
         show: false,
